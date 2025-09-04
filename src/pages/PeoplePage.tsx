@@ -67,9 +67,15 @@ export const PeoplePage = () => {
   }, [people, sortField, sortOrder]);
 
   const visiblePeople = sortedPeople.filter(person => {
-    const matchesQuery = person.name.toLowerCase().includes(query);
+    const lowerQuery = query.toLowerCase();
+
+    const matchesQuery =
+      person.name.toLowerCase().includes(lowerQuery) ||
+      person.motherName?.toLowerCase().includes(lowerQuery) ||
+      person.fatherName?.toLowerCase().includes(lowerQuery);
+
     const matchesSex = sex === '' || person.sex === sex;
-    const birthCentury = Math.ceil(person.died / 100);
+    const birthCentury = Math.ceil(person.born / 100);
     const matchesCentury =
       centuries.length === 0 || centuries.includes(birthCentury.toString());
 
@@ -98,9 +104,11 @@ export const PeoplePage = () => {
 
       <div className="block">
         <div className="columns is-desktop is-flex-direction-row-reverse">
-          <div className="column is-7-tablet is-narrow-desktop">
-            <PeopleFilters />
-          </div>
+          {!loading && !error && (
+            <div className="column is-7-tablet is-narrow-desktop">
+              <PeopleFilters />
+            </div>
+          )}
 
           <div className="column">
             <div className="box table-container">
