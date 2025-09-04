@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 export const PeopleFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -75,27 +75,27 @@ export const PeopleFilters = () => {
       <p className="panel-heading">Filters</p>
 
       <p className="panel-tabs" data-cy="SexFilter">
-        <Link
+        <a
           className={sex === '' ? 'is-active' : ''}
           onClick={() => handleSexChange('')}
-          to="#/people"
+          href="#/people"
         >
           All
-        </Link>
-        <Link
+        </a>
+        <a
           className={sex === 'm' ? 'is-active' : ''}
           onClick={() => handleSexChange('m')}
-          to="#/people?sex=m"
+          href="#/people?sex=m"
         >
           Male
-        </Link>
-        <Link
+        </a>
+        <a
           className={sex === 'f' ? 'is-active' : ''}
           onClick={() => handleSexChange('f')}
-          to="#/people?sex=f"
+          href="#/people?sex=f"
         >
           Female
-        </Link>
+        </a>
       </p>
 
       <div className="panel-block">
