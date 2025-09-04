@@ -17,7 +17,6 @@ export const PeoplePage = () => {
   useEffect(() => {
     getPeople()
       .then(fetchedPeople => {
-        // Додаємо зв'язки батьків
         const peopleMap: Record<string, Person> = Object.fromEntries(
           fetchedPeople.map(p => [p.name, p]),
         );
@@ -37,8 +36,8 @@ export const PeoplePage = () => {
   const query = searchParams.get('query')?.toLowerCase() || '';
   const sex = searchParams.get('sex') || '';
   const centuries = searchParams.getAll('centuries');
-  const sortField = searchParams.get('sort'); // поточне поле сортування
-  const sortOrder = searchParams.get('order'); // поточний порядок: 'desc' або null
+  const sortField = searchParams.get('sort');
+  const sortOrder = searchParams.get('order');
 
   const sortedPeople = useMemo(() => {
     if (!sortField) {
@@ -77,19 +76,15 @@ export const PeoplePage = () => {
     return matchesQuery && matchesSex && matchesCentury;
   });
 
-  // 2. handleSort – обробник кліку по заголовку колонки
   const handleSort = (field: keyof Person) => {
     const params = new URLSearchParams(searchParams);
 
     if (sortField !== field) {
-      // перший клік: сортування за зростанням
       params.set('sort', field);
       params.delete('order');
     } else if (sortField === field && !sortOrder) {
-      // другий клік: сортування за спаданням
       params.set('order', 'desc');
     } else {
-      // третій клік: вимкнення сортування
       params.delete('sort');
       params.delete('order');
     }
