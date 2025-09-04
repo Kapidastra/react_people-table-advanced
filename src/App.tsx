@@ -1,8 +1,8 @@
 import { PeoplePage } from './pages/PeoplePage';
 import { Navbar } from './components/Navbar/Navbar';
-import { Routes, Route, Navigate} from "react-router-dom";
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
-import { NotFoundPage } from "./pages/NotFoundPage";
+import { NotFoundPage } from './pages/NotFoundPage';
 
 import './App.scss';
 

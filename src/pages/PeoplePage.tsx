@@ -4,7 +4,7 @@ import { Loader } from '../components/Loader';
 import { PeopleTable } from '../components/PeopleTable/PeopleTable';
 import { useState, useEffect } from 'react';
 import { Person } from '../types';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 export const PeoplePage = () => {
   const [people, setPeople] = useState<Person[]>([]);
@@ -12,25 +12,27 @@ export const PeoplePage = () => {
   const [error, setError] = useState(false);
 
   const { slug } = useParams<{ slug?: string }>();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     getPeople()
-      .then(fetchedPeople => {
-        const peopleMap: Record<string, Person> = Object.fromEntries(
-          fetchedPeople.map(p => [p.name, p]),
-        );
-
-        const peopleWithParents = fetchedPeople.map(p => ({
-          ...p,
-          mother: p.motherName ? peopleMap[p.motherName] : undefined,
-          father: p.fatherName ? peopleMap[p.fatherName] : undefined,
-        }));
-
-        setPeople(peopleWithParents);
-      })
+      .then(setPeople)
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
+
+  const query = searchParams.get('query')?.toLowerCase() || '';
+  const centuries = searchParams.getAll('centuries');
+
+  const visiblePeople = people.filter(person => {
+    const matchesQuery = person.name.toLowerCase().includes(query);
+
+    const birthCentury = Math.ceil(person.died / 100);
+    const matchesCentury =
+      centuries.length === 0 || centuries.includes(birthCentury.toString());
+
+    return matchesQuery && matchesCentury;
+  });
 
   return (
     <>
@@ -45,21 +47,9 @@ export const PeoplePage = () => {
           <div className="column">
             <div className="box table-container">
               {loading && <Loader />}
-
-              {error && (
-                <p data-cy="peopleLoadingError" className="has-text-danger">
-                  Something went wrong
-                </p>
-              )}
-
-              {!loading && !error && people.length === 0 && (
-                <p data-cy="noPeopleMessage">
-                  There are no people on the server
-                </p>
-              )}
-
-              {!loading && !error && people.length > 0 && (
-                <PeopleTable people={people} highlightedSlug={slug} />
+              {error && <p className="has-text-danger">Something went wrong</p>}
+              {!loading && !error && (
+                <PeopleTable people={visiblePeople} highlightedSlug={slug} />
               )}
             </div>
           </div>

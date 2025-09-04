@@ -7,10 +7,7 @@ interface Props {
   highlightedSlug?: string;
 }
 
-export const PeopleTable: React.FC<Props> = ({
-  people,
-  highlightedSlug,
-}) => {
+export const PeopleTable: React.FC<Props> = ({ people, highlightedSlug }) => {
   return (
     <table
       data-cy="peopleTable"
