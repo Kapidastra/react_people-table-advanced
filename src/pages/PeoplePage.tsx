@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { PeopleFilters } from '../components/PeopleFilters/PeopleFilters';
 import { PeopleTable } from '../components/PeopleTable/PeopleTable';
@@ -12,7 +12,7 @@ export const PeoplePage = () => {
   const [error, setError] = useState(false);
 
   const { slug } = useParams<{ slug?: string }>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     getPeople()
@@ -37,8 +37,37 @@ export const PeoplePage = () => {
   const query = searchParams.get('query')?.toLowerCase() || '';
   const sex = searchParams.get('sex') || '';
   const centuries = searchParams.getAll('centuries');
+  const sortField = searchParams.get('sort'); // поточне поле сортування
+  const sortOrder = searchParams.get('order'); // поточний порядок: 'desc' або null
 
-  const visiblePeople = people.filter(person => {
+  const sortedPeople = useMemo(() => {
+    if (!sortField) {
+      return people;
+    }
+
+    const sorted = [...people].sort((a, b) => {
+      const aValue = a[sortField as keyof Person];
+      const bValue = b[sortField as keyof Person];
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return aValue.localeCompare(bValue);
+      }
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return aValue - bValue;
+      }
+
+      return 0;
+    });
+
+    if (sortOrder === 'desc') {
+      sorted.reverse();
+    }
+
+    return sorted;
+  }, [people, sortField, sortOrder]);
+
+  const visiblePeople = sortedPeople.filter(person => {
     const matchesQuery = person.name.toLowerCase().includes(query);
     const matchesSex = sex === '' || person.sex === sex;
     const birthCentury = Math.ceil(person.died / 100);
@@ -47,6 +76,26 @@ export const PeoplePage = () => {
 
     return matchesQuery && matchesSex && matchesCentury;
   });
+
+  // 2. handleSort – обробник кліку по заголовку колонки
+  const handleSort = (field: keyof Person) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (sortField !== field) {
+      // перший клік: сортування за зростанням
+      params.set('sort', field);
+      params.delete('order');
+    } else if (sortField === field && !sortOrder) {
+      // другий клік: сортування за спаданням
+      params.set('order', 'desc');
+    } else {
+      // третій клік: вимкнення сортування
+      params.delete('sort');
+      params.delete('order');
+    }
+
+    setSearchParams(params);
+  };
 
   return (
     <>
@@ -67,10 +116,16 @@ export const PeoplePage = () => {
                 </p>
               )}
               {!loading && !error && visiblePeople.length === 0 && (
-                <p>No people found</p>
+                <p data-cy="noPeopleMessage">No people found</p>
               )}
               {!loading && !error && visiblePeople.length > 0 && (
-                <PeopleTable people={visiblePeople} highlightedSlug={slug} />
+                <PeopleTable
+                  people={visiblePeople}
+                  highlightedSlug={slug}
+                  onSort={handleSort}
+                  sortField={sortField as keyof Person | undefined}
+                  sortOrder={sortOrder as 'asc' | 'desc' | undefined}
+                />
               )}
             </div>
           </div>

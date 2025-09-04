@@ -5,9 +5,30 @@ import React from 'react';
 interface Props {
   people: Person[];
   highlightedSlug?: string;
+  sortField?: keyof Person;
+  sortOrder?: 'asc' | 'desc';
+  onSort?: (field: keyof Person) => void;
 }
 
-export const PeopleTable: React.FC<Props> = ({ people, highlightedSlug }) => {
+export const PeopleTable: React.FC<Props> = ({
+  people,
+  highlightedSlug,
+  sortField,
+  sortOrder,
+  onSort,
+}) => {
+  const renderSortIcon = (field: keyof Person) => {
+    if (sortField === field) {
+      return sortOrder === 'desc' ? (
+        <i className="fas fa-sort-down" />
+      ) : (
+        <i className="fas fa-sort-up" />
+      );
+    }
+
+    return <i className="fas fa-sort" />;
+  };
+
   return (
     <table
       data-cy="peopleTable"
@@ -16,46 +37,42 @@ export const PeopleTable: React.FC<Props> = ({ people, highlightedSlug }) => {
       <thead>
         <tr>
           <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Name
-              <a href="#/people?sort=name">
-                <span className="icon">
-                  <i className="fas fa-sort" />
-                </span>
-              </a>
+            <span
+              className="is-flex is-flex-wrap-nowrap"
+              onClick={() => onSort && onSort('name')}
+              style={{ cursor: 'pointer' }}
+            >
+              Name<span className="icon">{renderSortIcon('name')}</span>
             </span>
           </th>
 
           <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Sex
-              <a href="#/people?sort=sex">
-                <span className="icon">
-                  <i className="fas fa-sort" />
-                </span>
-              </a>
+            <span
+              className="is-flex is-flex-wrap-nowrap"
+              onClick={() => onSort && onSort('sex')}
+              style={{ cursor: 'pointer' }}
+            >
+              Sex<span className="icon">{renderSortIcon('sex')}</span>
             </span>
           </th>
 
           <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Born
-              <a href="#/people?sort=born&amp;order=desc">
-                <span className="icon">
-                  <i className="fas fa-sort-up" />
-                </span>
-              </a>
+            <span
+              className="is-flex is-flex-wrap-nowrap"
+              onClick={() => onSort && onSort('born')}
+              style={{ cursor: 'pointer' }}
+            >
+              Born<span className="icon">{renderSortIcon('born')}</span>
             </span>
           </th>
 
           <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Died
-              <a href="#/people?sort=died">
-                <span className="icon">
-                  <i className="fas fa-sort" />
-                </span>
-              </a>
+            <span
+              className="is-flex is-flex-wrap-nowrap"
+              onClick={() => onSort && onSort('died')}
+              style={{ cursor: 'pointer' }}
+            >
+              Died<span className="icon">{renderSortIcon('died')}</span>
             </span>
           </th>
 
